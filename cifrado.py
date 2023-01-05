@@ -1,21 +1,38 @@
-def calculateKi(k1):
+def calculateKi(k1,buffOld):
     #input'11001101' 8 bits
     b='10000000'
     c='11111111'
 
     buff=bin((int(k1,2)&int(b,2))>>7)
 
-    ne=k1+buff[2:]
+    ne=k1+buffOld[2:]
     
     next2=bin(int(ne,2)&int(c,2))
     
-    return next2  
+    return [next2,buff]  
+
+def inverseKi(k1,buffOld):
+    #input'11001101' 8 bits
+    b='00000001'
+
+    buff=bin((int(k1,2)&int(b,2)))
+
+    print('buff',buff)
+
+    ne=buff[2:]+k1
+    
+    next2=bin(int(ne,2)>>1)
+    
+    return next2 
 
 def calculateK1(k):
     #input'001111010' 9bits
+    b='10000000'
+    buffOld=bin((int(k,2)&int(b,2))>>7)
+
     k1=bin(int(k,2)>>1)
     
-    return k1
+    return [k1,buffOld]
 
 def boxS1(p1):
     #input'1101' 4 bits
@@ -101,13 +118,90 @@ while(esBin==False):
 print("Introduzca el  numero deiteraciones que quiere realizar")
 n=input()
 
-k=calculateK1(entr)
+lik=calculateK1(entr)
+k=lik[0]
+buffOld=lik[1]
+
 l=entrada[:6]
 r=entrada[6:]
 
+listaK=[]
+
 for i in range(int(n)):
+
     k=k[2:]
+    print('K de la iteracion ', i,':',k)
+    er=expansion(r)
     
+    listaK.append(k)
+    erXORk=int(er,2)^int(k,2)
+    erXORk=bin(erXORk)
+    
+    t=erXORk[2:]
+    
+    le=len(t)
+    
+    if le == 1:
+        t1='0000'
+        t2='000'+t
+    if le == 2:
+        t1='0000'
+        t2='00'+t
+    if le == 3:
+        t1='0000'
+        t2='0'+t
+    if le == 4:
+        t1='0000'
+        t2=t
+    if le == 5:
+        t1='000'+t[0]
+        t2=t[1:]
+    if le == 6:
+        t1='00'+t[:2]
+        t2=t[2:]
+    if le == 7:
+        t1='0'+t[:3]
+        t2=t[3:]
+    if le == 8:
+        t1=t[:4]
+        t2=t[4:]
+    
+    s1=boxS1(t1)
+    s2=boxS2(t2)
+    f=s1+s2
+    l1=l
+    l=r
+    r=int(l1,2)^int(f,2)
+    r=bin(r)
+    
+    r=r[2:]
+    le=len(r)
+    if le == 1:
+        r='00000'+r
+    if le == 2:
+        r='0000'+r
+    if le == 3:
+        r='000'+r
+    if le == 4:
+        r='00'+r
+    if le == 5:
+        r='0'+r
+    
+    lik=calculateKi(k,buffOld)
+    k=lik[0]
+    buffOld=lik[1]
+
+print('dato cifrado:',r+l)
+
+
+
+
+k=listaK[int(n)-1]
+
+for i in range(int(n)):
+    print('it:', i)
+    print('k:',k)
+
     er=expansion(r)
     
     
@@ -143,9 +237,6 @@ for i in range(int(n)):
         t1=t[:4]
         t2=t[4:]
 
-    #solucion: pillar la longitud de t y en funcion de eso rellenar con los ceros que sean pertinentes
-    #va a salir un codigo wapo wapo
-    
     s1=boxS1(t1)
     s2=boxS2(t2)
     f=s1+s2
@@ -166,11 +257,8 @@ for i in range(int(n)):
         r='00'+r
     if le == 5:
         r='0'+r
-
-    k=calculateKi(k)
     
+    k=listaK[(int(n)-2)-i]
 
-print('dato cifrado:',r+l)
-
-
+print('dato descifrado:', r+l)
 
